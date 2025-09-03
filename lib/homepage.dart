@@ -7,6 +7,7 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:newbluetooth/login.dart';
+import 'package:phone_state/phone_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Homepage extends StatefulWidget {
@@ -27,6 +28,7 @@ class _HomepageState extends State<Homepage> {
   dynamic selectedValue;
   int secondsRemaining = 10800;
   String timerText = '03:00:00';
+  BluetoothDevice? lastDevice;
 
   Future<void> _checkSessionValidity() async {
     final prefs = await SharedPreferences.getInstance();
@@ -72,6 +74,20 @@ class _HomepageState extends State<Homepage> {
     super.initState();
     _initBluetooth();
     _checkSessionValidity();
+    _listenToPhoneState();
+  }
+
+  void _listenToPhoneState() {
+    PhoneState.stream.listen((event) {
+      if (event.status == PhoneStateStatus.CALL_ENDED) {
+        // try reconnect after call
+        Future.delayed(const Duration(seconds: 2), () {
+          if (!isConnected && lastDevice != null) {
+            _connectToDevice(lastDevice!);
+          }
+        });
+      }
+    });
   }
 
   Future<void> _initBluetooth() async {
@@ -87,6 +103,7 @@ class _HomepageState extends State<Homepage> {
   }
 
   Future<void> _connectToDevice(BluetoothDevice device) async {
+    lastDevice = device; // store device for reconnect
     setState(() => status = "Connecting to ${device.name}...");
     try {
       final conn = await BluetoothConnection.toAddress(device.address);
@@ -95,9 +112,16 @@ class _HomepageState extends State<Homepage> {
         isConnected = true;
         status = "Connected to ${device.name}";
       });
-      print('Connected to ${device.name}');
+
+      // listen for disconnection
+      connection?.input?.listen(null).onDone(() {
+        setState(() {
+          isConnected = false;
+          status = "Disconnected from ${device.name}";
+        });
+      });
+
     } catch (e) {
-      print("Connection failed: $e");
       setState(() => status = "Connection failed");
     }
   }
@@ -188,11 +212,11 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  @override
-  void dispose() {
-    connection?.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   connection?.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -207,147 +231,178 @@ class _HomepageState extends State<Homepage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final buttonWidth = (screenWidth - 75) / 5;
 
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 50, 50, 50),
-      appBar: AppBar(
-        title: Text(
-          status,
-          style: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: RawMaterialButton(
-              onPressed: _logout,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(2),
-                side: const BorderSide(color: Colors.black),
+    return PopScope(
+      canPop: false, // prevent auto-pop
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return; // system already popped, do nothing
+
+        bool shouldExit = await showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("Exit App"),
+            content: const Text("Do you want to disconnect and exit?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text("Cancel"),
               ),
-              child: const Text('Logout'),
-            ),
+              TextButton(
+                onPressed: () {
+                  connection?.dispose(); // disconnect only if user confirms
+                  Navigator.pop(context, true);
+                },
+                child: const Text("Exit"),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: isConnected
-          ? Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (selectedNumber != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Text(
-                    selectedNumber.toString(),
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 60,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+        );
+
+        if (shouldExit == true) {
+          Navigator.of(context).maybePop(); // now allow back navigation
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color.fromARGB(255, 50, 50, 50),
+        appBar: AppBar(
+          title: Text(
+            status,
+            style: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: RawMaterialButton(
+                onPressed: _logout,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(2),
+                  side: const BorderSide(color: Colors.black),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: RawMaterialButton(
-                    onPressed: () {
-                      _showDeviceSelectionDialog();
-                    },
-                    fillColor: Colors.green,
-                    constraints: BoxConstraints.tightFor(
-                      height: 50,
-                      width: double.infinity
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: const Text(
-                      'Connect to Device',
-                      style: TextStyle(
+                child: const Text('Logout'),
+              ),
+            ),
+          ],
+        ),
+        body: isConnected
+            ? Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (selectedNumber != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Text(
+                      selectedNumber.toString(),
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 22,
-                        color: Colors.white
+                        fontSize: 60,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Column(
-                    children: [
-                      for (int row = 0; row <= (allNumbers.length / 5).floor(); row++)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 12),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(5, (i) {
-                              int index = row * 5 + i;
-                              if (index >= allNumbers.length) {
-                                return SizedBox(width: buttonWidth);
-                              }
-
-                              final val = allNumbers[index];
-                              final isSelected = selectedNumber == val;
-
-                              return number(
-                                val.toString(),
-                                () {
-                                  if (val is int) {
-                                    _sendData(val);
-                                  } else if (val is double) {
-                                    _sendCustomDecimal(val);
-                                  }
-                                },
-                                buttonWidth,
-                                isSelected,
-                              );
-                            }),
-                          ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: RawMaterialButton(
+                      onPressed: () {
+                        _showDeviceSelectionDialog();
+                      },
+                      fillColor: Colors.green,
+                      constraints: BoxConstraints.tightFor(
+                        height: 50,
+                        width: double.infinity
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: const Text(
+                        'Connect to Device',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 22,
+                          color: Colors.white
                         ),
-                      const SizedBox(height: 2),
-                    ],
+                      ),
+                    ),
                   ),
-                ),
-                // const Divider(),
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(horizontal: 15),
-                //   child: RawMaterialButton(
-                //     onPressed: () {
-                //       setState(() {
-                //         selectedNumber = null;
-                //         status = "Selection cleared.";
-                //       });
-                //     },
-                //     fillColor: Colors.green,
-                //     constraints: const BoxConstraints.tightFor(
-                //         height: 50, width: double.infinity),
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(15),
-                //     ),
-                //     child: const Text(
-                //       'Clear',
-                //       style: TextStyle(fontFamily: 'Poppins', fontSize: 22),
-                //     ),
-                //   ),
-                // ),
-                const SizedBox(height: 40),
-              ],
-            )
-          : Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(status, style: const TextStyle(fontSize: 18)),
-                  const SizedBox(height: 20),
-                  if (bondedDevices.isNotEmpty)
-                    ...bondedDevices.map((device) {
-                      return ElevatedButton(
-                        onPressed: () => _connectToDevice(device),
-                        child: Text("Connect to ${device.name}"),
-                      );
-                    }),
+                  Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: Column(
+                      children: [
+                        for (int row = 0; row <= (allNumbers.length / 5).floor(); row++)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(5, (i) {
+                                int index = row * 5 + i;
+                                if (index >= allNumbers.length) {
+                                  return SizedBox(width: buttonWidth);
+                                }
+      
+                                final val = allNumbers[index];
+                                final isSelected = selectedNumber == val;
+      
+                                return number(
+                                  val.toString(),
+                                  () {
+                                    if (val is int) {
+                                      _sendData(val);
+                                    } else if (val is double) {
+                                      _sendCustomDecimal(val);
+                                    }
+                                  },
+                                  buttonWidth,
+                                  isSelected,
+                                );
+                              }),
+                            ),
+                          ),
+                        const SizedBox(height: 2),
+                      ],
+                    ),
+                  ),
+                  // const Divider(),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(horizontal: 15),
+                  //   child: RawMaterialButton(
+                  //     onPressed: () {
+                  //       setState(() {
+                  //         selectedNumber = null;
+                  //         status = "Selection cleared.";
+                  //       });
+                  //     },
+                  //     fillColor: Colors.green,
+                  //     constraints: const BoxConstraints.tightFor(
+                  //         height: 50, width: double.infinity),
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(15),
+                  //     ),
+                  //     child: const Text(
+                  //       'Clear',
+                  //       style: TextStyle(fontFamily: 'Poppins', fontSize: 22),
+                  //     ),
+                  //   ),
+                  // ),
+                  const SizedBox(height: 40),
                 ],
+              )
+            : Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(status, style: const TextStyle(fontSize: 18)),
+                    const SizedBox(height: 20),
+                    if (bondedDevices.isNotEmpty)
+                      ...bondedDevices.map((device) {
+                        return ElevatedButton(
+                          onPressed: () => _connectToDevice(device),
+                          child: Text("Connect to ${device.name}"),
+                        );
+                      }),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 
