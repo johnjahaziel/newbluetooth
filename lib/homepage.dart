@@ -109,7 +109,6 @@ class _HomepageState extends State<Homepage> {
       print("Sent: $formatted");
       setState(() {
         selectedNumber = number;
-        status = "Sent: $formatted";
       });
     } else {
       print("Not connected.");
@@ -124,7 +123,6 @@ class _HomepageState extends State<Homepage> {
 
       setState(() {
         selectedNumber = value;
-        status = "Sent: $formatted";
       });
     } else {
       print("Not connected.");
