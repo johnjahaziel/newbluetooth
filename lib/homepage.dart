@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -258,7 +258,10 @@ class _HomepageState extends State<Homepage> {
         );
 
         if (shouldExit == true) {
-          Navigator.of(context).maybePop(); // now allow back navigation
+          connection?.dispose();
+          Future.delayed(const Duration(milliseconds: 200), () {
+            SystemNavigator.pop(); // ✅ properly exits the app
+          });
         }
       },
       child: Scaffold(
@@ -323,6 +326,7 @@ class _HomepageState extends State<Homepage> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 15),
                   Container(
                     color: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 5),
@@ -361,28 +365,28 @@ class _HomepageState extends State<Homepage> {
                       ],
                     ),
                   ),
-                  // const Divider(),
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(horizontal: 15),
-                  //   child: RawMaterialButton(
-                  //     onPressed: () {
-                  //       setState(() {
-                  //         selectedNumber = null;
-                  //         status = "Selection cleared.";
-                  //       });
-                  //     },
-                  //     fillColor: Colors.green,
-                  //     constraints: const BoxConstraints.tightFor(
-                  //         height: 50, width: double.infinity),
-                  //     shape: RoundedRectangleBorder(
-                  //       borderRadius: BorderRadius.circular(15),
-                  //     ),
-                  //     child: const Text(
-                  //       'Clear',
-                  //       style: TextStyle(fontFamily: 'Poppins', fontSize: 22),
-                  //     ),
-                  //   ),
-                  // ),
+                  const Divider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: RawMaterialButton(
+                      onPressed: () {
+                        setState(() {
+                          selectedNumber = null;
+                          status = "Selection cleared.";
+                        });
+                      },
+                      fillColor: Colors.green,
+                      constraints: const BoxConstraints.tightFor(
+                          height: 50, width: double.infinity),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: const Text(
+                        'Clear',
+                        style: TextStyle(fontFamily: 'Poppins', fontSize: 22),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 40),
                 ],
               )
@@ -413,7 +417,7 @@ class _HomepageState extends State<Homepage> {
         onTap: onPressed,
         child: Container(
           width: width,
-          height: 50,
+          height: 55,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: isSelected
@@ -424,7 +428,7 @@ class _HomepageState extends State<Homepage> {
           child: Text(
             label,
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 22,
               fontFamily: 'Poppins',
               color: Colors.white,
             ),
