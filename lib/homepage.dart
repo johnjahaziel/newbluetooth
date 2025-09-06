@@ -185,32 +185,32 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
-  void _showDeviceSelectionDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Select Device"),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView(
-              shrinkWrap: true,
-              children: bondedDevices.map((device) {
-                return ListTile(
-                  title: Text(device.name ?? "Unknown"),
-                  subtitle: Text(device.address),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _connectToDevice(device);
-                  },
-                );
-              }).toList(),
-            ),
-          ),
-        );
-      },
-    );
-  }
+  // void _showDeviceSelectionDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         title: const Text("Select Device"),
+  //         content: SizedBox(
+  //           width: double.maxFinite,
+  //           child: ListView(
+  //             shrinkWrap: true,
+  //             children: bondedDevices.map((device) {
+  //               return ListTile(
+  //                 title: Text(device.name ?? "Unknown"),
+  //                 subtitle: Text(device.address),
+  //                 onTap: () {
+  //                   Navigator.pop(context);
+  //                   _connectToDevice(device);
+  //                 },
+  //               );
+  //             }).toList(),
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   // @override
   // void dispose() {
@@ -302,31 +302,31 @@ class _HomepageState extends State<Homepage> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: RawMaterialButton(
-                      onPressed: () {
-                        _showDeviceSelectionDialog();
-                      },
-                      fillColor: Colors.green,
-                      constraints: BoxConstraints.tightFor(
-                        height: 50,
-                        width: double.infinity
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: const Text(
-                        'Connect to Device',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 22,
-                          color: Colors.white
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 15),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(horizontal: 15),
+                  //   child: RawMaterialButton(
+                  //     onPressed: () {
+                  //       _showDeviceSelectionDialog();
+                  //     },
+                  //     fillColor: Colors.green,
+                  //     constraints: BoxConstraints.tightFor(
+                  //       height: 50,
+                  //       width: double.infinity
+                  //     ),
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(15),
+                  //     ),
+                  //     child: const Text(
+                  //       'Connect to Device',
+                  //       style: TextStyle(
+                  //         fontFamily: 'Poppins',
+                  //         fontSize: 22,
+                  //         color: Colors.white
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 15),
                   Container(
                     color: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 5),
