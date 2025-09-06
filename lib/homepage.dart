@@ -268,14 +268,14 @@ class _HomepageState extends State<Homepage> {
         backgroundColor: const Color.fromARGB(255, 50, 50, 50),
         appBar: AppBar(
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Status text
-            Text(
-              status,
-              style: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
-            ),
-            const SizedBox(width: 10),
+            // Text(
+            //   status,
+            //   style: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
+            // ),
+            // const SizedBox(width: 10),
 
             // Connect to Device button
             RawMaterialButton(
