@@ -1,3 +1,8 @@
+// ✅ Put SDK versions right at the top
+extra["compileSdkVersion"] = 34
+extra["targetSdkVersion"] = 34
+extra["minSdkVersion"] = 21
+
 allprojects {
     repositories {
         google()
@@ -14,6 +19,18 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(":app")
+}
+
+subprojects {
+    pluginManager.withPlugin("com.android.library") {
+        extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
+            compileSdk = rootProject.extra["compileSdkVersion"] as Int
+            defaultConfig {
+                minSdk = rootProject.extra["minSdkVersion"] as Int
+                targetSdk = rootProject.extra["targetSdkVersion"] as Int
+            }
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {

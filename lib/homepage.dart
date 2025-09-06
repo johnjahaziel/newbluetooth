@@ -185,32 +185,32 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
-  // void _showDeviceSelectionDialog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: const Text("Select Device"),
-  //         content: SizedBox(
-  //           width: double.maxFinite,
-  //           child: ListView(
-  //             shrinkWrap: true,
-  //             children: bondedDevices.map((device) {
-  //               return ListTile(
-  //                 title: Text(device.name ?? "Unknown"),
-  //                 subtitle: Text(device.address),
-  //                 onTap: () {
-  //                   Navigator.pop(context);
-  //                   _connectToDevice(device);
-  //                 },
-  //               );
-  //             }).toList(),
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+  void _showDeviceSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Select Device"),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView(
+              shrinkWrap: true,
+              children: bondedDevices.map((device) {
+                return ListTile(
+                  title: Text(device.name ?? "Unknown"),
+                  subtitle: Text(device.address),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _connectToDevice(device);
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   // @override
   // void dispose() {
@@ -267,24 +267,54 @@ class _HomepageState extends State<Homepage> {
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 50, 50, 50),
         appBar: AppBar(
-          title: Text(
-            status,
-            style: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: RawMaterialButton(
-                onPressed: _logout,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(2),
-                  side: const BorderSide(color: Colors.black),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Status text
+            Text(
+              status,
+              style: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
+            ),
+            const SizedBox(width: 10),
+
+            // Connect to Device button
+            RawMaterialButton(
+              onPressed: _showDeviceSelectionDialog,
+              fillColor: Colors.green,
+              constraints: const BoxConstraints.tightFor(
+                height: 35,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: const Text(
+                  'Connect',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
                 ),
-                child: const Text('Logout'),
               ),
             ),
           ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: RawMaterialButton(
+              onPressed: _logout,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(2),
+                side: const BorderSide(color: Colors.black),
+              ),
+              child: const Text('Logout'),
+            ),
+          ),
+        ],
+      ),
         body: isConnected
             ? Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -302,31 +332,6 @@ class _HomepageState extends State<Homepage> {
                       ),
                     ),
                   ),
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(horizontal: 15),
-                  //   child: RawMaterialButton(
-                  //     onPressed: () {
-                  //       _showDeviceSelectionDialog();
-                  //     },
-                  //     fillColor: Colors.green,
-                  //     constraints: BoxConstraints.tightFor(
-                  //       height: 50,
-                  //       width: double.infinity
-                  //     ),
-                  //     shape: RoundedRectangleBorder(
-                  //       borderRadius: BorderRadius.circular(15),
-                  //     ),
-                  //     child: const Text(
-                  //       'Connect to Device',
-                  //       style: TextStyle(
-                  //         fontFamily: 'Poppins',
-                  //         fontSize: 22,
-                  //         color: Colors.white
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 15),
                   Container(
                     color: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 5),

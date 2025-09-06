@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.bluetoothnew.newbluetooth"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = rootProject.extra["compileSdkVersion"] as Int
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -24,8 +24,8 @@ android {
         applicationId = "com.bluetoothnew.newbluetooth"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = rootProject.extra["minSdkVersion"] as Int
+        targetSdk = rootProject.extra["targetSdkVersion"] as Int
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
