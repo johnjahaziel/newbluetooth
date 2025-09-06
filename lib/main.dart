@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:newbluetooth/Userprovider.dart';
 import 'package:newbluetooth/homepage.dart';
 import 'package:newbluetooth/login.dart';
+import 'package:newbluetooth/pinpage.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,6 +37,11 @@ class MyApp extends StatelessWidget {
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
+  Future<bool> _isPinVerified() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isPinVerified') ?? false;
+  }
+
   Future<bool> _isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     final loginTime = prefs.getInt('login_time');
@@ -45,7 +51,7 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
-      future: _isLoggedIn(),
+      future: _isPinVerified(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -53,9 +59,26 @@ class AuthWrapper extends StatelessWidget {
           );
         } else {
           if (snapshot.hasData && snapshot.data == true) {
-            return const Homepage();
+            // PIN verified already → go to login/auth check
+            return FutureBuilder<bool>(
+              future: _isLoggedIn(),
+              builder: (context, loginSnapshot) {
+                if (loginSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                } else {
+                  if (loginSnapshot.hasData && loginSnapshot.data == true) {
+                    return const Homepage();
+                  } else {
+                    return const Login();
+                  }
+                }
+              },
+            );
           } else {
-            return const Login();
+            // First time → Ask for PIN
+            return const Pinpage();
           }
         }
       },
