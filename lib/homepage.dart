@@ -76,7 +76,7 @@ class _HomepageState extends State<Homepage> {
     _checkSessionValidity();
     _listenToPhoneState();
   }
-
+ 
   void _listenToPhoneState() {
     PhoneState.stream.listen((event) {
       if (event.status == PhoneStateStatus.CALL_ENDED) {
