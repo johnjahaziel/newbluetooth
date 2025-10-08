@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-import 'package:newbluetooth/loginnumber.dart';
+import 'package:newbluetooth/loginpassword.dart';
 import 'package:phone_state/phone_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -174,7 +174,7 @@ class _HomepageState extends State<Homepage> {
 
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const Loginnumber()),
+          MaterialPageRoute(builder: (context) => const Loginpassword()),
           (Route<dynamic> route) => false,
         );
       } else {
