@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-import 'package:newbluetooth/login.dart';
+import 'package:newbluetooth/loginnumber.dart';
 import 'package:phone_state/phone_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -157,7 +157,7 @@ class _HomepageState extends State<Homepage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('login_time');
 
-    final url = Uri.parse('https://app.1bluetooth.com/api.php?action=logout');
+    final url = Uri.parse('https://app1.1bluetooth.com/api.php?action=logoutnew');
 
     try {
       final phone = await prefs.getString('phone');
@@ -174,7 +174,7 @@ class _HomepageState extends State<Homepage> {
 
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const Login()),
+          MaterialPageRoute(builder: (context) => const Loginnumber()),
           (Route<dynamic> route) => false,
         );
       } else {

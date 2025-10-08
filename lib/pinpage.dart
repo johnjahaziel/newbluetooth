@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:newbluetooth/login.dart';
+import 'package:newbluetooth/loginnumber.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Pinpage extends StatefulWidget {
@@ -27,7 +27,7 @@ class _PinpageState extends State<Pinpage> {
   }
 
   Future<void> _fetchPins() async {
-    final url = Uri.parse("https://app.1bluetooth.com/api.php?action=get_pins");
+    final url = Uri.parse("https://app1.1bluetooth.com/api.php?action=get_pinsnew");
     final response = await http.get(url);
     
     if (response.statusCode == 200) {
@@ -49,7 +49,7 @@ class _PinpageState extends State<Pinpage> {
       Fluttertoast.showToast(msg: "Correct PIN");
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const Login()),
+        MaterialPageRoute(builder: (_) => const Loginnumber()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

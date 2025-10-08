@@ -1,7 +1,7 @@
 // ✅ Put SDK versions right at the top
 extra["compileSdkVersion"] = 34
 extra["targetSdkVersion"] = 34
-extra["minSdkVersion"] = 21
+extra["minSdkVersion"] = 24
 
 allprojects {
     repositories {

@@ -4,33 +4,28 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:newbluetooth/Userprovider.dart';
-import 'package:newbluetooth/homepage.dart';
-import 'package:provider/provider.dart';
+import 'package:newbluetooth/loginpassword.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Loginnumber extends StatefulWidget {
+  const Loginnumber({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Loginnumber> createState() => _LoginnumberState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginnumberState extends State<Loginnumber> {
   final TextEditingController _numberController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool isPassword = true;
   bool isLoading = false;
 
   List<dynamic> user = [];
 
   Future<void> login() async {
-    final url = Uri.parse('https://app.1bluetooth.com/api.php?action=user_simple_login');
+    final url = Uri.parse('https://app1.1bluetooth.com/api.php?action=phone_loging_statusnew');
 
-    if (_numberController.text.isEmpty || _passwordController.text.isEmpty) {
-      Fluttertoast.showToast(msg: "Please enter mobile number and password");
+    if (_numberController.text.isEmpty) {
+      Fluttertoast.showToast(msg: "Please enter mobile number");
       return;
     }
 
@@ -44,7 +39,6 @@ class _LoginState extends State<Login> {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'phone': _numberController.text,
-          'password': _passwordController.text,
         }),
       );
       print(response.body);
@@ -52,34 +46,15 @@ class _LoginState extends State<Login> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
 
-        if (responseData['message'] == 'User login successful (simple login)') {
-          final String userid = responseData['user_id'].toString();
+        if (responseData['message'] == "User loging_status updated to 1") {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('phone', _numberController.text);
 
-          if (responseData['status'] == 'Active') {
-            if (responseData['logs'] == 0) {
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setInt('login_time', DateTime.now().millisecondsSinceEpoch);
-              await prefs.setString('userId', userid);
-              await prefs.setString('phone', _numberController.text);
-
-              String? storedUserId = prefs.getString('userId');
-              Provider.of<UserProvider>(context, listen: false).setUserid(
-                storedUserId ?? userid,
-              );
-
-              print('storedUserId: $storedUserId');
-
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const Homepage()),
-                (Route<dynamic> route) => false,
-              );
-            } else {
-              Fluttertoast.showToast(msg: "Already Logged In");
-            }
-          } else {
-            Fluttertoast.showToast(msg: "Account is not active. Please contact Admin");
-          }
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const Loginpassword()),
+            (Route<dynamic> route) => false,
+          );
         } else {
           Fluttertoast.showToast(msg: responseData['message']);
         }
@@ -107,32 +82,6 @@ class _LoginState extends State<Login> {
             textfield(
               'Mobile Number',
               _numberController
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            password('Password',
-              Padding(
-                    padding: const EdgeInsets.only(right: 5),
-                    child: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isPassword = !isPassword;
-                        });
-                      },
-                      icon: isPassword ? Icon(
-                        FontAwesomeIcons.solidEyeSlash,
-                        color: Colors.black,
-                        size: 20,
-                      ) : Icon(
-                        FontAwesomeIcons.solidEye,
-                        color: Colors.black,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-              isPassword,
-              _passwordController
             ),
             SizedBox(
               height: 40,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:newbluetooth/Userprovider.dart';
 import 'package:newbluetooth/homepage.dart';
-import 'package:newbluetooth/login.dart';
+import 'package:newbluetooth/loginpassword.dart';
 import 'package:newbluetooth/pinpage.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,7 +71,7 @@ class AuthWrapper extends StatelessWidget {
                   if (loginSnapshot.hasData && loginSnapshot.data == true) {
                     return const Homepage();
                   } else {
-                    return const Login();
+                    return const Loginpassword();
                   }
                 }
               },
